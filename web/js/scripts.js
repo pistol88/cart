@@ -28,8 +28,24 @@ pistol88.cart = {
             
             pistol88.cart.changeElementCost(cartElementId, cartElementCount);
             pistol88.cart.changeElementCount(cartElementId, cartElementCount, url);
-
         });
+        
+        jQuery(document).on('spinstop', '.pistol88-cart-element-count.spinner', function () {
+
+            var self = this,
+                url = jQuery(self).data('href');
+
+            if (jQuery(self).attr('aria-valuenow') < 0) {
+                jQuery(self).attr('aria-valuenow').val('0');
+                return false;
+            }
+
+            cartElementId = jQuery(self).data('id');
+            cartElementCount = jQuery(self).attr('aria-valuenow');
+            
+            pistol88.cart.changeElementCost(cartElementId, cartElementCount);
+            pistol88.cart.changeElementCount(cartElementId, cartElementCount, url);
+        }); 
 
         jQuery(document).on('click', buyElementButton, function () {
 
@@ -75,6 +91,7 @@ pistol88.cart = {
         
         jQuery(document).on('click', '.pistol88-arr', this.changeInputValue);
         jQuery(document).on('change', '.pistol88-cart-element-before-count', this.changeBeforeElementCount);
+        jQuery(document).on('spinstop', '.pistol88-cart-element-before-count.spinner', this.changeBeforeElementCountAria);
         jQuery(document).on('change', '.pistol88-option-values-before', this.changeBeforeElementOptions);
         jQuery(document).on('change', '.pistol88-option-values', this.changeElementOptions);
 
@@ -169,6 +186,18 @@ pistol88.cart = {
 
         return true;
     },
+    changeBeforeElementCountAria: function () {
+		if ($(this).attr('aria-valuenow') <= 0) {
+            $(this).attr('aria-valuenow').val('0');
+        }
+	
+        var id = $(this).data('id');
+        var buyButton = $('.pistol88-cart-buy-button' + id);
+        $(buyButton).data('count', $(this).attr('aria-valuenow'));
+        $(buyButton).attr('data-count', $(this).attr('aria-valuenow'));
+
+        return true;
+    },
     changeElementCount: function (cartElementId, cartElementCount, url) {
 
         var data = {};
@@ -201,6 +230,10 @@ pistol88.cart = {
     truncate: function (url) {
         pistol88.cart.sendData({}, url);
         return false;
+    },
+    changeElementCost: function(cartElementId, cartElementCount) {
+        var newCost = jQuery('.pistol88-cart-element-price'+cartElementId).html() * cartElementCount;
+		jQuery('.pistol88-cart-element-cost'+cartElementId).html(newCost);
     },
     sendData: function (data, link) {
         if (!link) {
